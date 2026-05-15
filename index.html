@@ -1,6 +1,6 @@
 <html lang="en-us"><head>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Syobon Action HTML</title><link rel="icon" type="image/png" href="https://i.ibb.co/vBkZH0y/favicon.png">
@@ -8,36 +8,108 @@
   <meta name="google-site-verification" content="pfcfjitVZnjepiFTmEyjWo5erf_7PQM4RI7adb6_7pQ" />
   
     <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      /* ── ROTACIÓN LANDSCAPE EN PORTRAIT ── */
+      html, body {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #000;
+        touch-action: none;
+      }
+
+      /* Wrapper rotado 90° — ocupa todo el viewport girado */
+      #game-wrapper {
+        position: fixed;
+        top: 0; left: 0;
+        /* Al rotar 90°, ancho y alto se invierten */
+        width: 100vh;
+        height: 100vw;
+        transform-origin: top left;
+        transform: rotate(90deg) translateY(-100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        background: #111;
+        overflow: hidden;
+      }
+
+      /* Canvas centrado arriba */
+      #canvas-area {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
       .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
-      div.emscripten { text-align: center; font-size: 12px; }
-      div.emscripten_border { border: 1px solid black; }
-      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
-      canvas.emscripten { border: 1px solid black; }
-      body { background: #FFF; font-family: helvetica, arial, sans-serif; color: #000; }
-      h1, h2 { color: #000; text-align: center; }
-      #fullscreen-btn { margin: 20px; }
+      div.emscripten { text-align: center; font-size: 12px; color: #ccc; }
+      div.emscripten_border { border: 1px solid #444; }
+      canvas.emscripten { border: 0; display: block; max-width: 100%; max-height: 100%; }
       a { color: #66c; }
+
+      /* ── CONTROLES ── */
+      #mobile-controls {
+        width: 100%;
+        height: 150px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 24px 14px;
+        background: linear-gradient(transparent, rgba(0,0,0,0.85));
+        user-select: none;
+        flex-shrink: 0;
+      }
+
+      .dpad { position: relative; width: 130px; height: 130px; }
+      .btn-d {
+        position: absolute;
+        width: 44px; height: 44px;
+        background: rgba(255,255,255,0.18);
+        border: 2px solid rgba(255,255,255,0.4);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: background 0.08s;
+        color: #fff;
+      }
+      .btn-d:active, .btn-d.pressed { background: rgba(255,255,255,0.55); }
+      .btn-left  { left: 0;    top: 43px; }
+      .btn-right { left: 86px; top: 43px; }
+      .btn-up    { left: 43px; top: 0;    }
+      .btn-down  { left: 43px; top: 86px; }
+
+      .action-btns { display: flex; gap: 14px; align-items: center; }
+      .btn-action {
+        width: 60px; height: 60px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.5);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: bold; color: #fff;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .btn-enter { background: rgba(0,200,0,0.45); font-size: 10px; }
+      .btn-jump  { background: rgba(255,50,50,0.55); font-size: 22px; }
     </style>
   <style type="text/css"></style><style type="text/css" id="tts-styles">[data-tts-block-id].tts-active {background: rgba(206, 225, 255, 0.9) !important;} [data-tts-sentence-id].tts-active {background: rgba(0, 89, 191, 0.7) !important;}</style></head>
   <body>
-  
-    
-    <div class="emscripten" id="status"></div>
-    <div class="emscripten">
-      <progress value="0" max="1" id="progress" hidden=""></progress>  
-    </div>
-        <br>
-    <center>
-    <div class="emscripten_border">	  
-	  <p class="texto">Play Syobon Action using the cursor keys ← and → to move around the screen, use ↑ to jump and ↓ to enter in the pipes. Press Enter key ↲ to Start the game.</p>
-      <canvas height="420" width="480" class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-        <br>
-    </div>
-	</center>
-    <div class="emscripten">
-      
-      <br>
-      <a href="https://github.com/TheGamesss/Syobon-Action">File Source</a>. Ported by <a href="https://github.com/TheGamesss">@TheGamesss</a> using <a href="https://github.com">Github</a>.
+
+  <div id="game-wrapper">
+
+    <div id="canvas-area">
+      <div class="emscripten" id="status"></div>
+      <div class="emscripten">
+        <progress value="0" max="1" id="progress" hidden=""></progress>
+      </div>
+      <div class="emscripten_border">
+        <canvas height="420" width="480" class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+      </div>
     </div>
     <script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript">
       // connect to canvas
@@ -6805,52 +6877,7 @@ run();
         ga('send', 'pageview');
     </script>
 
-    <!-- CONTROLES MÓVILES -->
-    <style>
-      #mobile-controls {
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        height: 160px;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        padding: 10px 20px 20px;
-        background: linear-gradient(transparent, rgba(0,0,0,0.7));
-        z-index: 999;
-        user-select: none;
-      }
-      .dpad { position: relative; width: 130px; height: 130px; }
-      .btn-d {
-        position: absolute;
-        width: 42px; height: 42px;
-        background: rgba(255,255,255,0.2);
-        border: 2px solid rgba(255,255,255,0.4);
-        border-radius: 8px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 18px;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        transition: background 0.1s;
-      }
-      .btn-d:active, .btn-d.pressed { background: rgba(255,255,255,0.5); }
-      .btn-left  { left: 0;    top: 44px; }
-      .btn-right { left: 88px; top: 44px; }
-      .btn-up    { left: 44px; top: 0;    }
-      .btn-down  { left: 44px; top: 88px; }
-      .action-btns { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-      .btn-action {
-        width: 56px; height: 56px;
-        border-radius: 50%;
-        border: 3px solid rgba(255,255,255,0.5);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 13px; font-weight: bold; color: #fff;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .btn-enter { background: rgba(0,200,0,0.4); font-size: 11px; }
-      .btn-jump  { background: rgba(255,50,50,0.4); }
-    </style>
-
+    <!-- CONTROLES MÓVILES — dentro del wrapper rotado -->
     <div id="mobile-controls">
       <div class="dpad">
         <div class="btn-d btn-up"    data-key="ArrowUp"    data-code="38">↑</div>
@@ -6860,19 +6887,33 @@ run();
       </div>
       <div class="action-btns">
         <div class="btn-action btn-enter" data-key="Enter" data-code="13">START</div>
-        <div class="btn-action btn-jump"  data-key="ArrowUp" data-code="38">JUMP</div>
+        <div class="btn-action btn-jump"  data-key="ArrowUp" data-code="38">🦘</div>
       </div>
     </div>
 
+  </div><!-- /game-wrapper -->
+
     <script>
+      /* ── Disparo de teclas robusto para Emscripten ── */
       function fireKey(type, keyCode, key) {
-        const e = new KeyboardEvent(type, {
+        // Emscripten escucha keyCode/which en el evento; hay que forzarlos
+        const init = {
           bubbles: true, cancelable: true,
-          keyCode: keyCode, which: keyCode, key: key
-        });
+          key: key,
+          code: key === 'ArrowUp'    ? 'ArrowUp'    :
+                key === 'ArrowDown'  ? 'ArrowDown'  :
+                key === 'ArrowLeft'  ? 'ArrowLeft'  :
+                key === 'ArrowRight' ? 'ArrowRight' : key,
+          keyCode: keyCode, which: keyCode, charCode: 0
+        };
+        const e = new KeyboardEvent(type, init);
+        // Parchear keyCode porque es read-only en algunos navegadores
+        Object.defineProperty(e, 'keyCode', { get: () => keyCode });
+        Object.defineProperty(e, 'which',   { get: () => keyCode });
         document.dispatchEvent(e);
-        const canvas = document.querySelector('canvas');
+        const canvas = document.getElementById('canvas');
         if (canvas) canvas.dispatchEvent(e);
+        window.dispatchEvent(e);
       }
 
       document.querySelectorAll('[data-key]').forEach(btn => {
@@ -6890,17 +6931,45 @@ run();
           btn.classList.remove('pressed');
           fireKey('keyup', code, key);
         }, { passive: false });
+
+        // Fallback para mousedown (desktop testing)
+        btn.addEventListener('mousedown', e => {
+          btn.classList.add('pressed');
+          fireKey('keydown', code, key);
+        });
+        btn.addEventListener('mouseup', e => {
+          btn.classList.remove('pressed');
+          fireKey('keyup', code, key);
+        });
       });
 
-      if (!/Mobi|Android/i.test(navigator.userAgent)) {
-        document.getElementById('mobile-controls').style.display = 'none';
-      }
-    </script>
+      /* ── Ajustar canvas al espacio disponible ── */
+      function resizeCanvas() {
+        const wrapper = document.getElementById('game-wrapper');
+        const controls = document.getElementById('mobile-controls');
+        const canvas = document.getElementById('canvas');
+        if (!canvas || !wrapper) return;
 
-    <!-- TELEGRAM MINI APP -->
-    <script>
+        const availW = wrapper.clientWidth;   // ancho del wrapper (= alto real de pantalla)
+        const availH = wrapper.clientHeight - controls.offsetHeight;
+
+        // Canvas original: 480×420 → ratio 8/7
+        const ratio = 480 / 420;
+        let w = availW;
+        let h = w / ratio;
+        if (h > availH) { h = availH; w = h * ratio; }
+
+        canvas.style.width  = Math.floor(w) + 'px';
+        canvas.style.height = Math.floor(h) + 'px';
+      }
+      window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('load',   resizeCanvas);
+      setTimeout(resizeCanvas, 500);
+
+      /* ── Telegram Mini App ── */
       if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
         window.Telegram.WebApp.BackButton.show();
         window.Telegram.WebApp.BackButton.onClick(function() {
           window.Telegram.WebApp.close();
