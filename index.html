@@ -11,13 +11,12 @@
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body { width: 100vw; height: 100vh; overflow: hidden; background: #000; touch-action: none; }
 
-      /* PORTRAIT: rotar 90 para simular landscape */
+      /* PORTRAIT: layout normal sin rotación, controles abajo */
       @media (orientation: portrait) {
         #game-wrapper {
           position: fixed; top: 0; left: 0;
-          width: 100vh; height: 100vw;
-          transform-origin: top left;
-          transform: rotate(90deg) translateY(-100%);
+          width: 100vw; height: 100vh;
+          transform: none;
           display: flex; flex-direction: column; align-items: stretch;
           background: #111; overflow: hidden;
         }
@@ -25,7 +24,7 @@
         #mobile-controls { height: 150px; flex-shrink: 0; flex-direction: row; padding: 10px 24px 14px; }
       }
 
-      /* LANDSCAPE: layout normal sin rotación, controles a la derecha */
+      /* LANDSCAPE: rotar 90 para simular portrait / controles a la izquierda */
       @media (orientation: landscape) {
         #game-wrapper {
           position: fixed; top: 0; left: 0;
