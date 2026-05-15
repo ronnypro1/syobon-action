@@ -1,4 +1,6 @@
 <html lang="en-us"><head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Syobon Action HTML</title><link rel="icon" type="image/png" href="https://i.ibb.co/vBkZH0y/favicon.png">
@@ -6802,6 +6804,16 @@ run();
         ga('create', 'UA-42392611-1', 'int3.github.io');
         ga('send', 'pageview');
     </script>
-  
 
-<div id="screenRecording-controls" style="display: none;"><div id="screenRecording-controls__open-settings-btn"><img src="chrome-extension://flmihfcdcgigpfcfjpdcniidbfnffdcf/images/inject/gear.png"></div><div id="screenRecording-controls__settings"><div id="screenRecording-controls__settings__logo-container"><img src="chrome-extension://flmihfcdcgigpfcfjpdcniidbfnffdcf/images/inject/logo.svg"></div><div id="screenRecording-controls__settings__main-btn" class="screenRecording-controls__settings__btn screenRecording-controls__settings__btn_active"><div style="background-image: url(&quot;chrome-extension://flmihfcdcgigpfcfjpdcniidbfnffdcf/images/inject/pause.svg&quot;);"></div></div><div id="screenRecording-controls__settings__stop-btn" class="screenRecording-controls__settings__btn"><div style="background-image: url(&quot;chrome-extension://flmihfcdcgigpfcfjpdcniidbfnffdcf/images/inject/stop.svg&quot;);"></div></div><div id="screenRecording-controls__settings__close-btn" class="screenRecording-controls__settings__btn"><div style="background-image: url(&quot;chrome-extension://flmihfcdcgigpfcfjpdcniidbfnffdcf/images/inject/close.svg&quot;);"></div></div></div></div></body></html>
+    <!-- TELEGRAM MINI APP -->
+    <script>
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.BackButton.show();
+        window.Telegram.WebApp.BackButton.onClick(function() {
+          window.Telegram.WebApp.close();
+        });
+      }
+    </script>
+
+</body></html>
