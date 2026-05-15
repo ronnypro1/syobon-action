@@ -9,90 +9,65 @@
   
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 100vw; height: 100vh; overflow: hidden; background: #000; touch-action: none; }
 
-      /* ── ROTACIÓN LANDSCAPE EN PORTRAIT ── */
-      html, body {
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-        background: #000;
-        touch-action: none;
+      /* PORTRAIT: rotar 90 para simular landscape */
+      @media (orientation: portrait) {
+        #game-wrapper {
+          position: fixed; top: 0; left: 0;
+          width: 100vh; height: 100vw;
+          transform-origin: top left;
+          transform: rotate(90deg) translateY(-100%);
+          display: flex; flex-direction: column; align-items: stretch;
+          background: #111; overflow: hidden;
+        }
+        #canvas-area { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #mobile-controls { height: 150px; flex-shrink: 0; flex-direction: row; padding: 10px 24px 14px; }
       }
 
-      /* Wrapper rotado 90° — ocupa todo el viewport girado */
-      #game-wrapper {
-        position: fixed;
-        top: 0; left: 0;
-        /* Al rotar 90°, ancho y alto se invierten */
-        width: 100vh;
-        height: 100vw;
-        transform-origin: top left;
-        transform: rotate(90deg) translateY(-100%);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        background: #111;
-        overflow: hidden;
+      /* LANDSCAPE: layout normal sin rotación, controles a la derecha */
+      @media (orientation: landscape) {
+        #game-wrapper {
+          position: fixed; top: 0; left: 0;
+          width: 100vw; height: 100vh;
+          transform: none;
+          display: flex; flex-direction: row; align-items: stretch;
+          background: #111; overflow: hidden;
+        }
+        #canvas-area { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #mobile-controls {
+          width: 180px; height: 100%; flex-shrink: 0;
+          flex-direction: column; justify-content: center !important;
+          padding: 20px 14px; gap: 24px;
+        }
       }
 
-      /* Canvas centrado arriba */
-      #canvas-area {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-      }
-
+      /* Comunes */
+      #mobile-controls { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.75); user-select: none; gap: 16px; }
       .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
       div.emscripten { text-align: center; font-size: 12px; color: #ccc; }
-      div.emscripten_border { border: 1px solid #444; }
       canvas.emscripten { border: 0; display: block; max-width: 100%; max-height: 100%; }
       a { color: #66c; }
-
-      /* ── CONTROLES ── */
-      #mobile-controls {
-        width: 100%;
-        height: 150px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 24px 14px;
-        background: linear-gradient(transparent, rgba(0,0,0,0.85));
-        user-select: none;
-        flex-shrink: 0;
-      }
-
-      .dpad { position: relative; width: 130px; height: 130px; }
+      .dpad { position: relative; width: 130px; height: 130px; flex-shrink: 0; }
       .btn-d {
-        position: absolute;
-        width: 44px; height: 44px;
-        background: rgba(255,255,255,0.18);
-        border: 2px solid rgba(255,255,255,0.4);
-        border-radius: 8px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 20px;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        transition: background 0.08s;
-        color: #fff;
+        position: absolute; width: 44px; height: 44px;
+        background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.4);
+        border-radius: 8px; display: flex; align-items: center; justify-content: center;
+        font-size: 20px; color: #fff; cursor: pointer;
+        -webkit-tap-highlight-color: transparent; transition: background 0.08s;
       }
       .btn-d:active, .btn-d.pressed { background: rgba(255,255,255,0.55); }
       .btn-left  { left: 0;    top: 43px; }
       .btn-right { left: 86px; top: 43px; }
       .btn-up    { left: 43px; top: 0;    }
       .btn-down  { left: 43px; top: 86px; }
-
-      .action-btns { display: flex; gap: 14px; align-items: center; }
+      .action-btns { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
       .btn-action {
-        width: 60px; height: 60px;
-        border-radius: 50%;
+        width: 60px; height: 60px; border-radius: 50%;
         border: 3px solid rgba(255,255,255,0.5);
         display: flex; align-items: center; justify-content: center;
         font-size: 12px; font-weight: bold; color: #fff;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
+        cursor: pointer; -webkit-tap-highlight-color: transparent; flex-shrink: 0;
       }
       .btn-enter { background: rgba(0,200,0,0.45); font-size: 10px; }
       .btn-jump  { background: rgba(255,50,50,0.55); font-size: 22px; }
